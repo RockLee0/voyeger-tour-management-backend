@@ -18,7 +18,7 @@ export enum IsActive{
  * google authentication
  */
 export interface IAuthProvider {
-    provider : string , // credential(email, pass diya login krse)/google 
+    provider : "credentials" | "google" , // credential(email, pass diya login krse)/google 
     providerId: string // credential r goodle authentication er alada ekta id jeta diya confirm kore j user choose credential or google authentication
 }
 

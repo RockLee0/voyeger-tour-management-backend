@@ -25,7 +25,8 @@ const createUser= async(req: Request, res: Response, next: NextFunction)=>{
 }
  */
 const createUser= catchAsync(async (req: Request, res: Response, next: NextFunction)=>{
-        const user =await userService.createUser(req.body)
+    console.log(req.body)    
+    const user =await userService.createUser(req.body)
         
         /**
          *  res.status(httpStatus.CREATED).json({
