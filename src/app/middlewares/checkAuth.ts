@@ -13,14 +13,16 @@ export const checkAuth = (...authRoles : string[]) => async (req:Request, res: R
         throw new AppError(403,"There is no access token to enter this route");
     }
     const verifiedToken = verifyToken(accessToken, envVars.JWT_ACCESS_SECRET)
-    console.log((verifiedToken as JwtPayload).role, Role.ADMIN, Role.USER)
-
+    if (typeof verifiedToken === "string") {
+  throw new AppError(401, "Invalid token");
+   }
    if (!authRoles.includes((verifiedToken as JwtPayload).role)) {
     throw new AppError(
     403,
     "You have token but not for this route. Therefore you are not authorized to enter."
   );
 }
+    req.user = verifiedToken;
     next()
     }catch(error)
     {
