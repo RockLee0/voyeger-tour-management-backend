@@ -1,9 +1,11 @@
 import { AppError } from "../../errorHelpers/AppError";
-import { IAuthProvider, IUser } from "./user.interface";
+import { IAuthProvider, IsActive, IUser, Role } from "./user.interface";
 import { User } from "./user.model";
 import httpStatus from "http-status-codes"
 import bcrypt from "bcryptjs"
 import { envVars } from "../../config/env";
+import { JwtPayload } from "jsonwebtoken";
+import e from "cors";
 
 export const createUser =async (payload: Partial<IUser>)=>{
   //  const {name, email} = payload; It is enough to create a user. But what if the user gives other optional information. In this case it just drop them. Which is not a good practice
@@ -35,6 +37,33 @@ export const createUser =async (payload: Partial<IUser>)=>{
     return user
 }
 
+const updatedUser = async (userId: string, payload: Partial<IUser>, decodedToken: JwtPayload) =>{
+    
+  const ifUserExist =  await User.findById(userId);
+  if(!ifUserExist){
+    throw new AppError(httpStatus.FORBIDDEN, "This user cannot be updated as it doesn't exist")
+  }
+  
+  if (payload.role){
+      if(decodedToken.role === Role.USER || decodedToken.role === Role.GUIDE){
+         throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
+      }
+      if (payload.role === Role.SUPER_ADMIN && decodedToken.role === Role.ADMIN){
+         throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
+      }
+    }
+      if (payload.isActive || payload.isDeleted || payload.isVerified){
+        if (decodedToken.role === Role.USER || decodedToken.role === Role.GUIDE){
+         throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
+        }
+      }
+      if (payload.password){
+        payload.password = await bcrypt.hash(payload.password,envVars.BCRYPT_SALT_ROUND)
+      }
+      const newUpdateUser =  await User.findByIdAndUpdate(userId, payload, {new: true, runValidators: true })
+      return newUpdateUser;
+}
+
 export const getAllUsers = async ()=>{
     const allUsers = await User.find({})
     const totalUsers= await User.countDocuments()
@@ -46,5 +75,5 @@ export const getAllUsers = async ()=>{
 
 
 export const userService = {
-    createUser, getAllUsers
+    createUser, updatedUser, getAllUsers
 }
