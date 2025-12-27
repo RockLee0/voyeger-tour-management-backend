@@ -21,9 +21,15 @@ route.post(
   UserControllers.createUser
 );
 
+// update user route // 
+route.patch("/:id", checkAuth(...Object.values(Role)), UserControllers.updateUser)
+
 //---------get all users-----------//
 
 route.get("/allusers",checkAuth(Role.ADMIN, Role.SUPER_ADMIN) ,UserControllers.getAllUsers);
+
+
+
 
 export const UserRoutes = route;
 

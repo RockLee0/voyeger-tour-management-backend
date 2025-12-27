@@ -83,5 +83,5 @@ const getAllUsers = catchAsync(async(req: Request, res: Response, next: NextFunc
 
 
 export const UserControllers = {
-    createUser, getAllUsers
+    createUser, updateUser, getAllUsers
 }
